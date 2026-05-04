@@ -11,6 +11,9 @@ interface Props {
   onRefresh: () => void;
 }
 
+const inputCls = 'px-4 py-2 rounded-xl border border-white/10 text-white placeholder-white/25 focus:outline-none focus:ring-2 focus:ring-[#ff792c]/40 focus:border-[#ff792c]/60 text-sm transition-all';
+const inputStyle = { background: 'rgba(255,255,255,0.06)' };
+
 export default function TagManager({ tags, restaurants, onRefresh }: Props) {
   const [newLabel, setNewLabel] = useState('');
   const [newCategory, setNewCategory] = useState<TagCategory>('cuisine');
@@ -54,48 +57,55 @@ export default function TagManager({ tags, restaurants, onRefresh }: Props) {
 
   return (
     <div className="space-y-6">
+      {/* Add form */}
       <form onSubmit={handleAdd} className="flex flex-wrap gap-3 items-end">
         <div>
-          <label className="block text-xs font-medium text-stone-500 mb-1.5">標籤名稱</label>
+          <label className="block text-xs font-medium text-white/45 mb-1.5">標籤名稱</label>
           <input
             type="text"
             value={newLabel}
             onChange={(e) => setNewLabel(e.target.value)}
             placeholder="新增標籤"
-            className="px-4 py-2 rounded-xl border border-stone-200 focus:outline-none focus:ring-2 focus:ring-[#ff792c]/30 focus:border-[#ff792c] text-sm w-44"
+            className={`${inputCls} w-44`}
+            style={inputStyle}
           />
         </div>
         <div>
-          <label className="block text-xs font-medium text-stone-500 mb-1.5">分類</label>
+          <label className="block text-xs font-medium text-white/45 mb-1.5">分類</label>
           <select
             value={newCategory}
             onChange={(e) => setNewCategory(e.target.value as TagCategory)}
-            className="px-4 py-2 rounded-xl border border-stone-200 focus:outline-none focus:ring-2 focus:ring-[#ff792c]/30 focus:border-[#ff792c] text-sm bg-white"
+            className={inputCls}
+            style={inputStyle}
           >
             {categories.map((c) => (
-              <option key={c} value={c}>{TAG_CATEGORY_LABELS[c]}</option>
+              <option key={c} value={c} style={{ background: '#1a0800' }}>{TAG_CATEGORY_LABELS[c]}</option>
             ))}
           </select>
         </div>
-        <button type="submit" disabled={pending || !newLabel.trim()} className="px-5 py-2 rounded-xl bg-[#ff792c] text-white text-sm font-semibold hover:bg-[#e8681e] transition-colors disabled:opacity-50">
+        <button type="submit" disabled={pending || !newLabel.trim()}
+          className="px-5 py-2 rounded-xl bg-[#ff792c] text-white text-sm font-semibold hover:bg-[#e8681e] transition-colors disabled:opacity-50 shadow-lg shadow-orange-500/20">
           新增
         </button>
       </form>
 
+      {/* Tag list by category */}
       <div className="space-y-5">
         {categories.map((cat) => {
           const catTags = tags.filter((t) => t.category === cat);
           return (
             <div key={cat}>
-              <p className="text-xs font-semibold uppercase tracking-widest text-stone-400 mb-2">
+              <p className="text-xs font-semibold uppercase tracking-widest text-white/35 mb-2">
                 {TAG_CATEGORY_LABELS[cat]}
               </p>
               {catTags.length === 0 ? (
-                <p className="text-sm text-stone-300 italic">（尚無標籤）</p>
+                <p className="text-sm text-white/25 italic">（尚無標籤）</p>
               ) : (
                 <div className="flex flex-wrap gap-2">
                   {catTags.map((tag) => (
-                    <div key={tag.tag_id} className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-stone-100 text-stone-700 text-sm group">
+                    <div key={tag.tag_id}
+                      className="flex items-center gap-1.5 px-3 py-1.5 rounded-full border border-white/10 text-white/70 text-sm group transition-colors hover:border-white/20"
+                      style={{ background: 'rgba(255,255,255,0.07)' }}>
                       {editTarget?.tag_id === tag.tag_id ? (
                         <>
                           <input
@@ -103,18 +113,18 @@ export default function TagManager({ tags, restaurants, onRefresh }: Props) {
                             value={editLabel}
                             onChange={(e) => setEditLabel(e.target.value)}
                             onKeyDown={(e) => e.key === 'Enter' && handleUpdate(tag)}
-                            className="w-28 bg-transparent text-sm outline-none border-b border-stone-400"
+                            className="w-28 bg-transparent text-sm text-white outline-none border-b border-white/30"
                           />
-                          <button onClick={() => handleUpdate(tag)} className="text-[#ff792c] text-xs font-semibold">✓</button>
-                          <button onClick={() => setEditTarget(null)} className="text-stone-400 text-xs">✕</button>
+                          <button onClick={() => handleUpdate(tag)} className="text-[#ff792c] text-xs font-semibold hover:text-[#ff9a5c]">✓</button>
+                          <button onClick={() => setEditTarget(null)} className="text-white/35 text-xs hover:text-white/60">✕</button>
                         </>
                       ) : (
                         <>
                           <span>{tag.label}</span>
-                          <span className="text-xs text-stone-400">({usageCount(tag.label)})</span>
+                          <span className="text-xs text-white/30">({usageCount(tag.label)})</span>
                           <button
                             onClick={() => { setEditTarget(tag); setEditLabel(tag.label); }}
-                            className="hidden group-hover:inline text-stone-400 hover:text-stone-600 transition-colors ml-1"
+                            className="hidden group-hover:inline text-white/30 hover:text-white/60 transition-colors ml-1"
                             title="重新命名"
                           >
                             <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -123,7 +133,7 @@ export default function TagManager({ tags, restaurants, onRefresh }: Props) {
                           </button>
                           <button
                             onClick={() => setConfirmDelete(tag)}
-                            className="hidden group-hover:inline text-stone-300 hover:text-red-400 transition-colors"
+                            className="hidden group-hover:inline text-white/20 hover:text-red-400 transition-colors"
                             title="刪除"
                           >
                             <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -141,17 +151,21 @@ export default function TagManager({ tags, restaurants, onRefresh }: Props) {
         })}
       </div>
 
+      {/* Delete confirm modal */}
       {confirmDelete && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/40 backdrop-blur-sm" onClick={(e) => e.target === e.currentTarget && setConfirmDelete(null)}>
-          <div className="bg-white rounded-2xl shadow-xl p-6 max-w-sm w-full">
-            <h3 className="font-serif font-bold text-lg text-stone-900 mb-2">確定刪除標籤？</h3>
-            <p className="text-sm text-stone-500 mb-2">
-              標籤「{confirmDelete.label}」目前被 <strong>{usageCount(confirmDelete.label)} 間店家</strong>使用。
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm" onClick={(e) => e.target === e.currentTarget && setConfirmDelete(null)}>
+          <div className="backdrop-blur-xl rounded-2xl shadow-2xl border border-white/10 p-6 max-w-sm w-full" style={{ background: 'rgba(20,8,0,0.88)' }}>
+            <h3 className="font-serif font-bold text-lg text-white mb-2">確定刪除標籤？</h3>
+            <p className="text-sm text-white/50 mb-2">
+              標籤「{confirmDelete.label}」目前被 <strong className="text-white/70">{usageCount(confirmDelete.label)} 間店家</strong>使用。
             </p>
-            <p className="text-sm text-stone-400 mb-6">刪除後，這些店家的該標籤將會移除。</p>
+            <p className="text-sm text-white/35 mb-6">刪除後，這些店家的該標籤將會移除。</p>
             <div className="flex gap-3">
-              <button onClick={() => setConfirmDelete(null)} className="flex-1 py-2.5 rounded-xl border border-stone-200 text-sm font-medium text-stone-600 hover:bg-stone-50">取消</button>
-              <button onClick={() => handleDelete(confirmDelete)} disabled={pending} className="flex-1 py-2.5 rounded-xl bg-red-500 text-white text-sm font-semibold hover:bg-red-600 disabled:opacity-50">
+              <button onClick={() => setConfirmDelete(null)}
+                className="flex-1 py-2.5 rounded-xl border border-white/10 text-sm font-medium text-white/60 hover:bg-white/8 transition-colors"
+                style={{ background: 'rgba(255,255,255,0.05)' }}>取消</button>
+              <button onClick={() => handleDelete(confirmDelete)} disabled={pending}
+                className="flex-1 py-2.5 rounded-xl bg-red-500/80 text-white text-sm font-semibold hover:bg-red-500 disabled:opacity-50 transition-colors">
                 {pending ? '刪除中…' : '確定刪除'}
               </button>
             </div>

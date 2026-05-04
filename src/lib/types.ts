@@ -12,15 +12,16 @@ export interface Restaurant {
 export interface Tag {
   tag_id: string;
   label: string;
-  category: 'meal_time' | 'price' | 'cuisine';
+  category: 'meal_time' | 'price' | 'cuisine' | 'other';
 }
 
-export type TagCategory = 'meal_time' | 'price' | 'cuisine';
+export type TagCategory = 'meal_time' | 'price' | 'cuisine' | 'other';
 
 export const TAG_CATEGORY_LABELS: Record<TagCategory, string> = {
   meal_time: '用餐時段',
   price: '價位',
   cuisine: '料理類型',
+  other: '其他',
 };
 
 export const DEFAULT_TAGS: Omit<Tag, 'tag_id'>[] = [

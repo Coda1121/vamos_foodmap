@@ -49,6 +49,17 @@ function buildWheelSample(pool: Restaurant[]): Restaurant[] {
   return shuffled.slice(0, MAX_WHEEL_NAMES);
 }
 
+function AnimatedBackground() {
+  return (
+    <div style={{ position: 'fixed', inset: 0, zIndex: -10, overflow: 'hidden', background: '#0f0700' }}>
+      <div className="bg-blob bg-blob-1" />
+      <div className="bg-blob bg-blob-2" />
+      <div className="bg-blob bg-blob-3" />
+      <div className="bg-blob bg-blob-4" />
+    </div>
+  );
+}
+
 export default function Home() {
   const [restaurants, setRestaurants] = useState<Restaurant[]>([]);
   const [tags, setTags] = useState<Tag[]>([]);
@@ -112,132 +123,135 @@ export default function Home() {
   const tooFew = filtered.length < 2;
 
   return (
-    <main className="min-h-screen bg-stone-50">
-      <header className="sticky top-0 z-20 bg-stone-50/80 backdrop-blur-sm border-b border-stone-100">
-        <div className="max-w-5xl mx-auto px-6 h-16 flex items-center justify-between">
-          <h1 className="font-serif font-bold text-lg text-stone-900 tracking-tight">今天吃什麼？</h1>
-          <Link
-            href="/admin"
-            className="w-8 h-8 flex items-center justify-center rounded-full text-stone-400 hover:text-stone-600 hover:bg-stone-100 transition-colors"
-            title="管理後台"
-          >
-            <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.8} d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.8} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-            </svg>
-          </Link>
-        </div>
-      </header>
-
-      <div className="max-w-5xl mx-auto px-6 py-8">
-        {loading ? (
-          <div className="flex justify-center py-20">
-            <div className="w-8 h-8 border-2 border-[#ff792c] border-t-transparent rounded-full animate-spin" />
-          </div>
-        ) : restaurants.length === 0 ? (
-          <div className="text-center py-20">
-            <div className="text-5xl mb-4">🍽️</div>
-            <h2 className="font-serif text-2xl font-bold text-stone-800 mb-2">資料庫還是空的</h2>
-            <p className="text-stone-500 mb-6">先到管理頁新增幾間店家，就能開始抽籤囉！</p>
-            <Link href="/admin" className="inline-flex items-center gap-2 px-6 py-3 rounded-2xl bg-[#ff792c] text-white font-semibold text-sm hover:bg-[#e8681e] transition-colors">
-              前往新增店家
+    <>
+      <AnimatedBackground />
+      <main className="min-h-screen">
+        <header className="sticky top-0 z-20 bg-black/25 backdrop-blur-md border-b border-white/10">
+          <div className="max-w-5xl mx-auto px-6 h-16 flex items-center justify-between">
+            <h1 className="font-serif font-bold text-lg text-white tracking-tight">今天吃什麼？</h1>
+            <Link
+              href="/admin"
+              className="w-8 h-8 flex items-center justify-center rounded-full text-white/50 hover:text-white hover:bg-white/10 transition-colors"
+              title="管理後台"
+            >
+              <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.8} d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.8} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+              </svg>
             </Link>
           </div>
-        ) : (
-          <div className="space-y-6">
+        </header>
 
-            {/* 主區塊：桌機左右分欄，手機上下排列 */}
-            <div className="flex flex-col md:flex-row md:items-start gap-6">
-
-              {/* 左：轉盤（手機排第一，桌機在左） */}
-              <div className="flex flex-col items-center gap-4 md:w-[420px] md:shrink-0">
-                {result ? (
-                  <ResultCard
-                    restaurant={result}
-                    onReroll={handleReroll}
-                    resetMessage={resetMessage}
-                  />
-                ) : tooFew ? (
-                  <div className="w-full bg-amber-50 border border-amber-100 rounded-3xl p-8 text-center">
-                    <p className="text-amber-700 font-medium">篩選條件太嚴格，請放寬條件</p>
-                    <p className="text-amber-500 text-sm mt-1">目前符合條件的店家不足 2 間</p>
-                  </div>
-                ) : (
-                  <>
-                    <p className="text-sm text-stone-400">符合條件 {filtered.length} 間店家</p>
-                    <SpinWheel names={wheelSample.map((r) => r.name)} onResult={handleWheelResult} />
-                  </>
-                )}
-              </div>
-
-              {/* 右：篩選條件（手機排第二，桌機在右） */}
-              <div className="flex-1">
-                <div className="bg-white rounded-3xl p-6 shadow-sm border border-stone-100">
-                  <h2 className="font-serif font-bold text-stone-900 mb-4 text-lg">篩選條件</h2>
-                  {tags.length > 0 ? (
-                    <TagFilter tags={tags} selected={selected} onChange={setSelected} />
-                  ) : (
-                    <p className="text-sm text-stone-400">尚未設定任何標籤</p>
-                  )}
-                  {selected.length > 0 && (
-                    <button onClick={() => setSelected([])} className="mt-4 text-xs text-stone-400 hover:text-stone-600 underline underline-offset-2">
-                      清除所有篩選
-                    </button>
-                  )}
-                </div>
-              </div>
+        <div className="max-w-5xl mx-auto px-6 py-8">
+          {loading ? (
+            <div className="flex justify-center py-20">
+              <div className="w-8 h-8 border-2 border-[#ff792c] border-t-transparent rounded-full animate-spin" />
             </div>
+          ) : restaurants.length === 0 ? (
+            <div className="text-center py-20">
+              <div className="text-5xl mb-4">🍽️</div>
+              <h2 className="font-serif text-2xl font-bold text-white mb-2">資料庫還是空的</h2>
+              <p className="text-white/60 mb-6">先到管理頁新增幾間店家，就能開始抽籤囉！</p>
+              <Link href="/admin" className="inline-flex items-center gap-2 px-6 py-3 rounded-2xl bg-[#ff792c] text-white font-semibold text-sm hover:bg-[#e8681e] transition-colors">
+                前往新增店家
+              </Link>
+            </div>
+          ) : (
+            <div className="space-y-6">
 
-            {/* 符合條件的店家清單 */}
-            {filtered.length > 0 && (
-              <div className="bg-white rounded-3xl shadow-sm border border-stone-100 overflow-hidden">
-                <div className="px-6 py-4 border-b border-stone-50 flex items-center justify-between">
-                  <h2 className="font-serif font-bold text-stone-900 text-lg">符合條件的店家</h2>
-                  <span className="text-sm text-stone-400">{filtered.length} 間</span>
+              <div className="flex flex-col md:flex-row md:items-start gap-6">
+
+                {/* 左：轉盤 */}
+                <div className="flex flex-col items-center gap-4 md:w-[420px] md:shrink-0">
+                  {result ? (
+                    <ResultCard
+                      key={result.id}
+                      restaurant={result}
+                      onReroll={handleReroll}
+                      resetMessage={resetMessage}
+                    />
+                  ) : tooFew ? (
+                    <div className="w-full bg-white/10 backdrop-blur-sm border border-white/20 rounded-3xl p-8 text-center">
+                      <p className="text-orange-200 font-medium">篩選條件太嚴格，請放寬條件</p>
+                      <p className="text-orange-300/70 text-sm mt-1">目前符合條件的店家不足 2 間</p>
+                    </div>
+                  ) : (
+                    <>
+                      <p className="text-sm text-white/50">符合條件 {filtered.length} 間店家</p>
+                      <SpinWheel names={wheelSample.map((r) => r.name)} onResult={handleWheelResult} />
+                    </>
+                  )}
                 </div>
-                <div className="overflow-x-auto">
-                  <table className="w-full text-sm">
-                    <thead>
-                      <tr className="border-b border-stone-50">
-                        <th className="text-left py-3 px-6 text-xs font-semibold text-stone-400 uppercase tracking-wider">店家名稱</th>
-                        <th className="text-left py-3 px-6 text-xs font-semibold text-stone-400 uppercase tracking-wider hidden sm:table-cell">標籤</th>
-                        <th className="text-left py-3 px-6 text-xs font-semibold text-stone-400 uppercase tracking-wider hidden md:table-cell">備註</th>
-                        <th className="text-left py-3 px-6 text-xs font-semibold text-stone-400 uppercase tracking-wider hidden lg:table-cell">地址</th>
-                        <th className="py-3 px-6 hidden md:table-cell"></th>
-                      </tr>
-                    </thead>
-                    <tbody className="divide-y divide-stone-50">
-                      {filtered.map((r) => (
-                        <tr key={r.id} className="hover:bg-stone-50/60 transition-colors">
-                          <td className="py-3.5 px-6 font-medium text-stone-900">{r.name}</td>
-                          <td className="py-3.5 px-6 hidden sm:table-cell">
-                            <div className="flex flex-wrap gap-1">
-                              {r.tags.map((tag) => (
-                                <span key={tag} className="px-2 py-0.5 rounded-full text-xs bg-orange-50 text-[#ff792c]">{tag}</span>
-                              ))}
-                            </div>
-                          </td>
-                          <td className="py-3.5 px-6 text-stone-400 hidden md:table-cell max-w-[180px] truncate">{r.note || '—'}</td>
-                          <td className="py-3.5 px-6 text-stone-400 hidden lg:table-cell max-w-[200px] truncate">{r.address || '—'}</td>
-                          <td className="py-3.5 px-6 hidden md:table-cell">
-                            {r.google_maps_url && (
-                              <a href={r.google_maps_url} target="_blank" rel="noopener noreferrer"
-                                className="text-xs text-[#ff792c] hover:underline whitespace-nowrap">
-                                Maps ↗
-                              </a>
-                            )}
-                          </td>
-                        </tr>
-                      ))}
-                    </tbody>
-                  </table>
+
+                {/* 右：篩選條件 */}
+                <div className="flex-1">
+                  <div className="backdrop-blur-xl rounded-3xl p-6 shadow-2xl border border-white/10" style={{ background: 'rgba(255,255,255,0.06)' }}>
+                    <h2 className="font-serif font-bold text-white mb-4 text-lg">篩選條件</h2>
+                    {tags.length > 0 ? (
+                      <TagFilter tags={tags} selected={selected} onChange={setSelected} />
+                    ) : (
+                      <p className="text-sm text-white/40">尚未設定任何標籤</p>
+                    )}
+                    {selected.length > 0 && (
+                      <button onClick={() => setSelected([])} className="mt-4 text-xs text-white/40 hover:text-white/70 underline underline-offset-2 transition-colors">
+                        清除所有篩選
+                      </button>
+                    )}
+                  </div>
                 </div>
               </div>
-            )}
 
-          </div>
-        )}
-      </div>
-    </main>
+              {/* 符合條件的店家清單 */}
+              {filtered.length > 0 && (
+                <div className="backdrop-blur-xl rounded-3xl shadow-2xl border border-white/10 overflow-hidden" style={{ background: 'rgba(255,255,255,0.06)' }}>
+                  <div className="px-6 py-4 border-b border-white/8 flex items-center justify-between">
+                    <h2 className="font-serif font-bold text-white text-lg">符合條件的店家</h2>
+                    <span className="text-sm text-white/40">{filtered.length} 間</span>
+                  </div>
+                  <div className="overflow-x-auto">
+                    <table className="w-full text-sm">
+                      <thead>
+                        <tr className="border-b border-white/8">
+                          <th className="text-left py-3 px-6 text-xs font-semibold text-white/35 uppercase tracking-wider">店家名稱</th>
+                          <th className="text-left py-3 px-6 text-xs font-semibold text-white/35 uppercase tracking-wider hidden sm:table-cell">標籤</th>
+                          <th className="text-left py-3 px-6 text-xs font-semibold text-white/35 uppercase tracking-wider hidden md:table-cell">備註</th>
+                          <th className="text-left py-3 px-6 text-xs font-semibold text-white/35 uppercase tracking-wider hidden lg:table-cell">地址</th>
+                          <th className="py-3 px-6 hidden md:table-cell"></th>
+                        </tr>
+                      </thead>
+                      <tbody className="divide-y divide-white/6">
+                        {filtered.map((r) => (
+                          <tr key={r.id} className="hover:bg-white/5 transition-colors">
+                            <td className="py-3.5 px-6 font-medium text-white/90">{r.name}</td>
+                            <td className="py-3.5 px-6 hidden sm:table-cell">
+                              <div className="flex flex-wrap gap-1">
+                                {r.tags.map((tag) => (
+                                  <span key={tag} className="px-2 py-0.5 rounded-full text-xs bg-orange-500/20 text-[#ff9a5c] border border-orange-500/20">{tag}</span>
+                                ))}
+                              </div>
+                            </td>
+                            <td className="py-3.5 px-6 text-white/40 hidden md:table-cell max-w-[180px] truncate">{r.note || '—'}</td>
+                            <td className="py-3.5 px-6 text-white/40 hidden lg:table-cell max-w-[200px] truncate">{r.address || '—'}</td>
+                            <td className="py-3.5 px-6 hidden md:table-cell">
+                              {r.google_maps_url && (
+                                <a href={r.google_maps_url} target="_blank" rel="noopener noreferrer"
+                                  className="text-xs text-[#ff792c] hover:text-[#ff9a5c] hover:underline whitespace-nowrap transition-colors">
+                                  Maps ↗
+                                </a>
+                              )}
+                            </td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
+                </div>
+              )}
+
+            </div>
+          )}
+        </div>
+      </main>
+    </>
   );
 }

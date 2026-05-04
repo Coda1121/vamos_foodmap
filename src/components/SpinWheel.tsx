@@ -8,15 +8,12 @@ interface Props {
   disabled?: boolean;
 }
 
-const COLORS = [
-  '#ff792c', '#ffb347', '#ff6b6b', '#ffd93d',
-  '#6bcb77', '#4d96ff', '#ff6b9d', '#c77dff',
-  '#ff9f1c', '#2ec4b6', '#e71d36', '#011627',
-];
+const COLORS = ['#ff792c', '#1a1a1a'];
 
 export default function SpinWheel({ names, onResult, disabled }: Props) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const [spinning, setSpinning] = useState(false);
+  const [flashing, setFlashing] = useState(false);
   const angleRef = useRef(0);
   const rafRef = useRef<number | null>(null);
   const containerRef = useRef<HTMLDivElement>(null);
@@ -37,7 +34,7 @@ export default function SpinWheel({ names, onResult, disabled }: Props) {
     draw(angleRef.current);
   }, [names, size]);
 
-  function draw(angle: number) {
+  function draw(angle: number, highlightIndex?: number, highlightOn?: boolean) {
     const canvas = canvasRef.current;
     if (!canvas || names.length === 0) return;
     const ctx = canvas.getContext('2d')!;
@@ -48,24 +45,26 @@ export default function SpinWheel({ names, onResult, disabled }: Props) {
     names.forEach((name, i) => {
       const start = angle + i * arc;
       const end = start + arc;
+      const isWinner = i === highlightIndex && highlightOn;
 
-      // Sector
       ctx.beginPath();
       ctx.moveTo(r, r);
       ctx.arc(r, r, r - 2, start, end);
       ctx.closePath();
-      ctx.fillStyle = COLORS[i % COLORS.length];
+      const segColor = COLORS[i % COLORS.length];
+      ctx.fillStyle = isWinner ? '#FFD700' : segColor;
       ctx.fill();
-      ctx.strokeStyle = 'white';
-      ctx.lineWidth = 2;
+      ctx.strokeStyle = 'rgba(255,255,255,0.25)';
+      ctx.lineWidth = isWinner ? 3 : 2;
       ctx.stroke();
 
-      // Label
       ctx.save();
       ctx.translate(r, r);
       ctx.rotate(start + arc / 2);
       ctx.textAlign = 'right';
-      ctx.fillStyle = 'white';
+      // orange segment → white text; black segment → orange text; winner → dark gold
+      const textColor = isWinner ? '#7B4A00' : (segColor === '#1a1a1a' ? '#ff792c' : 'white');
+      ctx.fillStyle = textColor;
       const fontSize = Math.max(10, Math.min(14, (r * 0.9) / (name.length * 0.65)));
       ctx.font = `bold ${fontSize}px 'Noto Serif TC', serif`;
       ctx.shadowColor = 'rgba(0,0,0,0.3)';
@@ -76,7 +75,6 @@ export default function SpinWheel({ names, onResult, disabled }: Props) {
       ctx.restore();
     });
 
-    // Center circle
     ctx.beginPath();
     ctx.arc(r, r, 22, 0, 2 * Math.PI);
     ctx.fillStyle = 'white';
@@ -86,8 +84,23 @@ export default function SpinWheel({ names, onResult, disabled }: Props) {
     ctx.shadowBlur = 0;
   }
 
+  function flashWinner(finalAngle: number, winnerIndex: number, callback: () => void) {
+    let count = 0;
+    function step() {
+      if (count >= 6) {
+        draw(finalAngle);
+        callback();
+        return;
+      }
+      draw(finalAngle, winnerIndex, count % 2 === 0);
+      count++;
+      setTimeout(step, 160);
+    }
+    step();
+  }
+
   function spin() {
-    if (spinning || disabled || names.length === 0) return;
+    if (spinning || flashing || disabled || names.length === 0) return;
     setSpinning(true);
 
     const totalRotation = 2 * Math.PI * (8 + Math.random() * 5);
@@ -111,10 +124,15 @@ export default function SpinWheel({ names, onResult, disabled }: Props) {
       } else {
         setSpinning(false);
         const arc = (2 * Math.PI) / names.length;
-        // Pointer is at top (- π/2), wheel rotates clockwise
-        const normalized = ((2 * Math.PI - (current % (2 * Math.PI))) % (2 * Math.PI));
+        const pointerAngle = -Math.PI / 2;
+        const normalized = ((pointerAngle - current) % (2 * Math.PI) + 2 * Math.PI) % (2 * Math.PI);
         const index = Math.floor(normalized / arc) % names.length;
-        onResult(index);
+
+        setFlashing(true);
+        flashWinner(current, index, () => {
+          setFlashing(false);
+          onResult(index);
+        });
       }
     }
 
@@ -123,29 +141,36 @@ export default function SpinWheel({ names, onResult, disabled }: Props) {
 
   if (names.length === 0) return null;
 
+  const isActive = spinning || flashing;
+
   return (
     <div ref={containerRef} className="flex flex-col items-center gap-6 w-full">
       <div className="relative" style={{ width: size, height: size }}>
-        {/* Pointer */}
         <div
-          className="absolute top-0 left-1/2 -translate-x-1/2 -translate-y-1 z-10"
-          style={{ width: 0, height: 0, borderLeft: '12px solid transparent', borderRight: '12px solid transparent', borderTop: '28px solid #ff792c', filter: 'drop-shadow(0 2px 4px rgba(0,0,0,0.2))' }}
+          className={`absolute top-0 left-1/2 -translate-x-1/2 -translate-y-1 z-10 ${flashing ? 'animate-pointer-bounce' : ''}`}
+          style={{
+            width: 0, height: 0,
+            borderLeft: '12px solid transparent',
+            borderRight: '12px solid transparent',
+            borderTop: '28px solid #ff792c',
+            filter: 'drop-shadow(0 2px 4px rgba(0,0,0,0.2))',
+          }}
         />
         <canvas
           ref={canvasRef}
           width={size}
           height={size}
-          className="rounded-full shadow-2xl"
+          className={`rounded-full shadow-2xl transition-shadow duration-300 ${spinning ? 'wheel-spinning' : ''}`}
           style={{ display: 'block' }}
         />
       </div>
 
       <button
         onClick={spin}
-        disabled={spinning || disabled}
+        disabled={isActive || disabled}
         className="px-12 py-4 rounded-2xl bg-[#ff792c] text-white font-bold text-lg tracking-wide shadow-lg hover:bg-[#e8681e] active:scale-95 transition-all duration-150 disabled:opacity-50 disabled:cursor-not-allowed"
       >
-        {spinning ? '旋轉中…' : '轉！'}
+        {spinning ? '旋轉中…' : flashing ? '🎯 就是你！' : '轉！'}
       </button>
     </div>
   );

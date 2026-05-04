@@ -26,7 +26,7 @@ export default function TagFilter({ tags, selected, onChange }: Props) {
         if (catTags.length === 0) return null;
         return (
           <div key={cat}>
-            <p className="text-xs font-semibold uppercase tracking-widest text-stone-400 mb-2">
+            <p className="text-xs font-semibold uppercase tracking-widest text-white/40 mb-2">
               {TAG_CATEGORY_LABELS[cat]}
             </p>
             <div className="flex flex-wrap gap-2">
@@ -38,8 +38,8 @@ export default function TagFilter({ tags, selected, onChange }: Props) {
                     onClick={() => toggle(tag.label)}
                     className={`px-4 py-1.5 rounded-full text-sm font-medium transition-all duration-150 ${
                       active
-                        ? 'bg-[#ff792c] text-white shadow-sm'
-                        : 'bg-stone-100 text-stone-600 hover:bg-stone-200'
+                        ? 'bg-[#ff792c] text-white shadow-sm shadow-orange-500/30'
+                        : 'bg-white/10 text-white/70 border border-white/10 hover:bg-white/18 hover:text-white'
                     }`}
                   >
                     {tag.label}
