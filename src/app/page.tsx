@@ -114,7 +114,7 @@ export default function Home() {
   return (
     <main className="min-h-screen bg-stone-50">
       <header className="sticky top-0 z-20 bg-stone-50/80 backdrop-blur-sm border-b border-stone-100">
-        <div className="max-w-3xl mx-auto px-6 h-16 flex items-center justify-between">
+        <div className="max-w-5xl mx-auto px-6 h-16 flex items-center justify-between">
           <h1 className="font-serif font-bold text-lg text-stone-900 tracking-tight">今天吃什麼？</h1>
           <Link
             href="/admin"
@@ -129,7 +129,7 @@ export default function Home() {
         </div>
       </header>
 
-      <div className="max-w-3xl mx-auto px-6 py-10 space-y-8">
+      <div className="max-w-5xl mx-auto px-6 py-8">
         {loading ? (
           <div className="flex justify-center py-20">
             <div className="w-8 h-8 border-2 border-[#ff792c] border-t-transparent rounded-full animate-spin" />
@@ -144,24 +144,20 @@ export default function Home() {
             </Link>
           </div>
         ) : (
-          <>
-            <section className="bg-white rounded-3xl p-6 shadow-sm border border-stone-100">
-              <h2 className="font-serif font-bold text-stone-900 mb-4 text-lg">篩選條件</h2>
-              {tags.length > 0 ? (
-                <TagFilter tags={tags} selected={selected} onChange={setSelected} />
-              ) : (
-                <p className="text-sm text-stone-400">尚未設定任何標籤</p>
-              )}
-              {selected.length > 0 && (
-                <button onClick={() => setSelected([])} className="mt-4 text-xs text-stone-400 hover:text-stone-600 underline underline-offset-2">
-                  清除所有篩選
-                </button>
-              )}
-            </section>
+          <div className="space-y-6">
 
-            {!result && (
-              <section className="flex flex-col items-center gap-4">
-                {tooFew ? (
+            {/* 主區塊：桌機左右分欄，手機上下排列 */}
+            <div className="flex flex-col md:flex-row md:items-start gap-6">
+
+              {/* 左：轉盤（手機排第一，桌機在左） */}
+              <div className="flex flex-col items-center gap-4 md:w-[420px] md:shrink-0">
+                {result ? (
+                  <ResultCard
+                    restaurant={result}
+                    onReroll={handleReroll}
+                    resetMessage={resetMessage}
+                  />
+                ) : tooFew ? (
                   <div className="w-full bg-amber-50 border border-amber-100 rounded-3xl p-8 text-center">
                     <p className="text-amber-700 font-medium">篩選條件太嚴格，請放寬條件</p>
                     <p className="text-amber-500 text-sm mt-1">目前符合條件的店家不足 2 間</p>
@@ -172,19 +168,74 @@ export default function Home() {
                     <SpinWheel names={wheelSample.map((r) => r.name)} onResult={handleWheelResult} />
                   </>
                 )}
-              </section>
+              </div>
+
+              {/* 右：篩選條件（手機排第二，桌機在右） */}
+              <div className="flex-1">
+                <div className="bg-white rounded-3xl p-6 shadow-sm border border-stone-100">
+                  <h2 className="font-serif font-bold text-stone-900 mb-4 text-lg">篩選條件</h2>
+                  {tags.length > 0 ? (
+                    <TagFilter tags={tags} selected={selected} onChange={setSelected} />
+                  ) : (
+                    <p className="text-sm text-stone-400">尚未設定任何標籤</p>
+                  )}
+                  {selected.length > 0 && (
+                    <button onClick={() => setSelected([])} className="mt-4 text-xs text-stone-400 hover:text-stone-600 underline underline-offset-2">
+                      清除所有篩選
+                    </button>
+                  )}
+                </div>
+              </div>
+            </div>
+
+            {/* 符合條件的店家清單 */}
+            {filtered.length > 0 && (
+              <div className="bg-white rounded-3xl shadow-sm border border-stone-100 overflow-hidden">
+                <div className="px-6 py-4 border-b border-stone-50 flex items-center justify-between">
+                  <h2 className="font-serif font-bold text-stone-900 text-lg">符合條件的店家</h2>
+                  <span className="text-sm text-stone-400">{filtered.length} 間</span>
+                </div>
+                <div className="overflow-x-auto">
+                  <table className="w-full text-sm">
+                    <thead>
+                      <tr className="border-b border-stone-50">
+                        <th className="text-left py-3 px-6 text-xs font-semibold text-stone-400 uppercase tracking-wider">店家名稱</th>
+                        <th className="text-left py-3 px-6 text-xs font-semibold text-stone-400 uppercase tracking-wider hidden sm:table-cell">標籤</th>
+                        <th className="text-left py-3 px-6 text-xs font-semibold text-stone-400 uppercase tracking-wider hidden md:table-cell">備註</th>
+                        <th className="text-left py-3 px-6 text-xs font-semibold text-stone-400 uppercase tracking-wider hidden lg:table-cell">地址</th>
+                        <th className="py-3 px-6 hidden md:table-cell"></th>
+                      </tr>
+                    </thead>
+                    <tbody className="divide-y divide-stone-50">
+                      {filtered.map((r) => (
+                        <tr key={r.id} className="hover:bg-stone-50/60 transition-colors">
+                          <td className="py-3.5 px-6 font-medium text-stone-900">{r.name}</td>
+                          <td className="py-3.5 px-6 hidden sm:table-cell">
+                            <div className="flex flex-wrap gap-1">
+                              {r.tags.map((tag) => (
+                                <span key={tag} className="px-2 py-0.5 rounded-full text-xs bg-orange-50 text-[#ff792c]">{tag}</span>
+                              ))}
+                            </div>
+                          </td>
+                          <td className="py-3.5 px-6 text-stone-400 hidden md:table-cell max-w-[180px] truncate">{r.note || '—'}</td>
+                          <td className="py-3.5 px-6 text-stone-400 hidden lg:table-cell max-w-[200px] truncate">{r.address || '—'}</td>
+                          <td className="py-3.5 px-6 hidden md:table-cell">
+                            {r.google_maps_url && (
+                              <a href={r.google_maps_url} target="_blank" rel="noopener noreferrer"
+                                className="text-xs text-[#ff792c] hover:underline whitespace-nowrap">
+                                Maps ↗
+                              </a>
+                            )}
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              </div>
             )}
 
-            {result && (
-              <section className="flex justify-center">
-                <ResultCard
-                  restaurant={result}
-                  onReroll={handleReroll}
-                  resetMessage={resetMessage}
-                />
-              </section>
-            )}
-          </>
+          </div>
         )}
       </div>
     </main>
